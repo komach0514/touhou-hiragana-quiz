@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>東方ひらがなクイズ</title>
+<style>
+  body {
+    font-family: sans-serif;
+    text-align: center;
+    background: #ffffff;
+    color: #000000;
+  }
+  h1 { font-size: 36px; }
+  #char { font-size: 48px; margin: 20px; }
+  input { font-size: 18px; padding: 5px; }
+  button { font-size: 16px; padding: 5px 15px; }
+</style>
+</head>
+<body>
+
+<div id="title">
+  <h1>東方 ひらがなクイズ</h1>
+  <p>Enterキーでスタート</p>
+  <button onclick="startGame()">スタート</button>
+</div>
+
+<div id="game" style="display:none;">
+  <div id="char"></div>
+  <input id="answer" placeholder="ひらがなで入力">
+  <button onclick="check()">送信</button>
+  <p id="result"></p>
+  <p id="score">スコア: 0</p>
+  <p id="miss">ミス: 0 / 2</p>
+</div>
+
+<div id="end" style="display:none;">
+  <h2 id="endMessage"></h2>
+  <p id="finalScore"></p>
+</div>
+
+<script>
+const characters = [
+["大妖精","だいようせい"],
+["紅美鈴","ほんめいりん"],
+["小悪魔","こあくま"],
+["十六夜咲夜","いざよいさくや"],
+["橙","ちぇん"],
+["魂魄妖夢","こんぱくようむ"],
+["西行寺幽々子","さいぎょうじゆゆこ"],
+["八雲藍","やくもらん"],
+["八雲紫","やくもゆかり"],
+["上白沢慧音","かみしらさわけいね"],
+["因幡てゐ","いなばてゐ"],
+["鈴仙・優曇華院・イナバ","れいせん・うどんげいん・いなば"],
+["八意永琳","やごころえいりん"],
+["蓬莱山輝夜","ほうらいさんかぐや"],
+["藤原妹紅","ふじわらのもこう"],
+["風見幽香","かざみゆうか"],
+["小野塚小町","おのづかこまち"],
+["四季映姫・ヤマザナドゥ","しきえいき・やまざなどぅ"],
+["秋静葉","あきしずは"],
+["秋穣子","あきみのりこ"],
+["鍵山雛","かぎやまひな"],
+["河城にとり","かわしろにとり"],
+["犬走椛","いぬばしりもみじ"],
+["射命丸文","しゃめいまるあや"],
+["東風谷早苗","こちやさなえ"],
+["八坂神奈子","やさかかなこ"],
+["洩矢諏訪子","もりやすわこ"],
+["黒谷ヤマメ","くろたにやまめ"],
+["水橋パルスィ","みずはしぱるすぃ"],
+["星熊勇儀","ほしぐまゆうぎ"],
+["古明地さとり","こめいじさとり"],
+["火焔猫燐","かえんびょうりん"],
+["霊烏路空","れいうじうつほ"],
+["古明地こいし","こめいじこいし"],
+["多々良小傘","たたらこがさ"],
+["雲居一輪＆雲山","くもいいちりん＆うんざん"],
+["村紗水蜜","むらさみなみつ"],
+["寅丸星","とらまるしょう"],
+["聖白蓮","ひじりびゃくれん"],
+["封獣ぬえ","ほうじゅうぬえ"],
+["幽谷響子","かそだにきょうこ"],
+["宮古芳香","みやこよしか"],
+["霍青娥","かくせいが"],
+["蘇我屠自古","そがのとじこ"],
+["物部布都","もののべのふと"],
+["豊聡耳神子","とよさとみみのみこ"],
+["二ツ岩マミゾウ","ふたついわまみぞう"],
+["赤蛮奇","せきばんき"],
+["今泉影狼","いまいずみかげろう"],
+["九十九弁々","つくもべんべん"],
+["九十九八橋","つくもやつはし"],
+["鬼神正邪","きじんせいじゃ"],
+["少名針妙丸","すくなしんみょうまる"],
+["堀川雷鼓","ほりかわらいこ"],
+["青蘭","せいらん"],
+["鈴瑚","りんご"],
+["稀神サグメ","きしんさぐめ"],
+["純狐","じゅんこ"],
+["坂田ネムノ","さかたねむの"],
+["高麗野あうん","こまのあうん"],
+["矢田寺成美","やたでらなるみ"],
+["丁礼田舞","ていれいだまい"],
+["爾子田里乃","にしださとの"],
+["摩多羅隠岐奈","またらおきな"],
+["戎瓔花","えびすえいか"],
+["牛崎潤美","うしざきうるみ"],
+["庭渡久侘歌","にわたりくたか"],
+["吉弔八千慧","きっちょうやちえ"],
+["杖刀偶磨弓","じょうとうぐうまゆみ"],
+["埴安神袿姫","はにやすしんけいき"],
+["黒駒早鬼","くろこまさき"],
+["豪徳寺ミケ","ごうとくじみけ"],
+["山城たかね","やましろたかね"],
+["駒草山如","こまくささんにょ"],
+["玉造魅須丸","たまつくりみすまる"],
+["管牧典","くだまきつかさ"],
+["飯綱丸龍","いづなまるめぐむ"],
+["天弓千亦","てんきゅうちまた"],
+["姫虫百々世","ひめむしももよ"],
+["孫美天","そんびてん"],
+["三頭慧ノ子","みつがしらえのこ"],
+["天火人ちやり","てんかじんちやり"],
+["豫母都日狭美","よもつひさみ"],
+["日白残無","にっぱくざんむ"],
+["依神女苑","よりがみじょおん"],
+["依神紫苑","よりがみしおん"],
+["比那名居天子","ひななゐてんし"],
+["永江衣玖","ながえいく"],
+["秦こころ","はたのこころ"],
+["姫海棠はたて","ひめかいどうはたて"],
+["饕餮尤魔","とうてつゆうま"],
+["伊吹萃香","いぶきすいか"],
+["玄爺","げんじい"],
+["里香","りか"],
+["明羅","めいら"],
+["魅魔","みま"],
+["子兎姫","ことひめ"],
+["夢子","ゆめこ"],
+["朝倉理香子","あさくらりかこ"],
+["夢月","むげつ"],
+["幻月","げんげつ"],
+["岡崎夢実","おかざきゆめみ"],
+["神綺","しんき"],
+["北白川ちゆり","きたしらかわちゆり"],
+["森近霖之助","もりちかりんのすけ"],
+["朱鷺子","ときこ"],
+["綿月依姫","わたつきのよりひめ"],
+["綿月豊姫","わたつきのとよひめ"],
+["茨木華扇","いばらきかせん"],
+["本居小鈴","もとおりこすず"],
+["奥野田美宵","おくのだみよい"],
+["稗田阿求","ひえだのあきゅう"],
+["宮出口瑞霊","みやでぐちみずち"],
+["宇佐見蓮子","うさみれんこ"],
+["宇佐見菫子","うさみすみれこ"],
+["博麗霊夢","はくれいれいむ"],
+["霧雨魔理沙","きりさめまりさ"],
+["塵塚ウバメ","ちりづかうばめ"],
+["封獣チミ","ほうじゅうちみ"],
+["道神馴子","みちがみなれこ"],
+["ユイマン・浅間","ゆいまん・あさま"],
+["磐永阿梨夜","いわながありや"],
+["渡里ニナ","わたりにな"],
+["魂魄妖忌","こんぱくようき"],
+["冴月麟","さつきりん"]
+];
+
+let list = [];
+let index = 0;
+let score = 0;
+let miss = 0;
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && document.getElementById("title").style.display !== "none") {
+    startGame();
+  }
+});
+
+function startGame() {
+  list = characters.sort(() => Math.random() - 0.5);
+  index = 0;
+  score = 0;
+  miss = 0;
+
+  document.getElementById("title").style.display = "none";
+  document.getElementById("game").style.display = "block";
+
+  update();
+}
+
+function update() {
+  document.getElementById("char").textContent = list[index][0];
+  document.getElementById("answer").value = "";
+  document.getElementById("answer").focus();
+}
+
+function check() {
+  const input = document.getElementById("answer").value.trim();
+  const correct = list[index][1];
+
+  if (input === correct) {
+    score += 10;
+    document.getElementById("result").textContent = "正解！";
+  } else {
+    score -= 10;
+    miss++;
+    document.getElementById("result").textContent = "不正解（" + correct + "）";
+  }
+
+  document.getElementById("score").textContent = "スコア: " + score;
+  document.getElementById("miss").textContent = "ミス: " + miss + " / 2";
+
+  if (miss >= 2) {
+    endGame("ゲームオーバー");
+    return;
+  }
+
+  index++;
+  if (index >= list.length) {
+    endGame("全問クリア！");
+    return;
+  }
+
+  update();
+}
+
+function endGame(msg) {
+  document.getElementById("game").style.display = "none";
+  document.getElementById("end").style.display = "block";
+  document.getElementById("endMessage").textContent = msg;
+  document.getElementById("finalScore").textContent = "スコア: " + score;
+}
+</script>
+
+</body>
+</html>
